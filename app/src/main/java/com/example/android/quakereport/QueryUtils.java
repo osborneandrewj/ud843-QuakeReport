@@ -14,6 +14,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -85,13 +86,13 @@ public final class QueryUtils {
      * @param JSONResponse
      * @return (if successful), a new Quake object
      */
-    private List<Quake> extractFeaturesFromJson(String JSONResponse) {
+    public static ArrayList<Quake> extractFeaturesFromJson(String JSONResponse) {
         if (TextUtils.isEmpty(JSONResponse)) {
             return null;
         }
 
         // Create an empty ArrayList to which we can add Quake objects
-        List<Quake> earthquakes = new ArrayList<>();
+        ArrayList<Quake> earthquakes = new ArrayList<>();
 
         try {
             // Convert String into a JSONObject
@@ -128,7 +129,7 @@ public final class QueryUtils {
      * @param aUrlString
      * @return
      */
-    private static URL createURL(String aUrlString) {
+    public static URL createURL(String aUrlString) {
         URL url = null;
         try {
             url = new URL(aUrlString);
@@ -144,7 +145,7 @@ public final class QueryUtils {
      * @param url
      * @return
      */
-    private static String makeHttpRequest(URL url) throws IOException {
+    public static String makeHttpRequest(URL url) throws IOException {
 
         String JSONresponse = "";
 
@@ -167,13 +168,20 @@ public final class QueryUtils {
             if (httpURLConnection.getResponseCode() == 200) {
                 // Get the data and store it in the inputStream Object
                 inputStream = httpURLConnection.getInputStream();
+                JSONresponse = readFromStream(inputStream);
                 // // TODO: 12/7/2016 Get this parsed into a String
+            } else {
+                JSONresponse = "";
+                Log.v(LOG_TAG, "Error response code: " + httpURLConnection.getResponseCode());
             }
         } catch (IOException e) {
             Log.e(LOG_TAG, "Error creating URL connection: " + e);
         } finally {
             if (httpURLConnection != null) {
                 httpURLConnection.disconnect();
+            }
+            if (inputStream != null) {
+                inputStream.close();
             }
         }
 
@@ -188,14 +196,15 @@ public final class QueryUtils {
      * @throws IOException
      */
     private static String readFromStream(InputStream inputStream) throws IOException {
-        StringBuilder output  = null;
-
+        StringBuilder output  = new StringBuilder();
         if (inputStream != null) {
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            String line = bufferedReader.readLine();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, Charset.forName("UTF-8")));
+            String line = reader.readLine();
             while (line != null) {
+                Log.v(LOG_TAG, "Output: " + output + line);
                 output.append(line);
-                line = bufferedReader.readLine();
+                line = reader.readLine();
+                Log.v(LOG_TAG, "Output: " + output + line);
             }
         }
         return output.toString();

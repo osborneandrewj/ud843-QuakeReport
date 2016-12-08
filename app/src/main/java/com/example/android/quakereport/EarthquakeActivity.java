@@ -20,12 +20,14 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.webkit.HttpAuthHandler;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +35,10 @@ import java.util.List;
 public class EarthquakeActivity extends AppCompatActivity {
 
     public static final String LOG_TAG = EarthquakeActivity.class.getName();
+
+    public static final String USGS_QUERY_URL = "http://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=2016-12-01&endtime=2016-12-06&minmagnitude=5";
+
+    public ArrayList<Quake> earthquakes;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,27 +62,63 @@ public class EarthquakeActivity extends AppCompatActivity {
         // so the list can be populated in the user interface
         // earthquakeListView.setAdapter(adapter);
 
-//        earthquakeListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//                // Get the quake object at the given position the user clicked on
-//                Quake quake = earthquakes.get(position);
-//
-//                String url = quake.getUrl();
-//
-//                Intent intent = new Intent(Intent.ACTION_VIEW);
-//                intent.setData(Uri.parse(url));
-//                startActivity(intent);
-//            }
-//        });
+
+
+        EarthquakeAsyncTask task = new EarthquakeAsyncTask();
+        task.execute();
+
+        ListView earthquakeListView = (ListView) findViewById(R.id.list);
+        // Set onclick listener
+        earthquakeListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                // Get the quake object at the given position the user clicked on
+                Quake quake = earthquakes.get(position);
+
+                String url = quake.getUrl();
+
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setData(Uri.parse(url));
+                startActivity(intent);
+            }
+        });
     }
 
-    private class EarthquakeAsyncTask extends AsyncTask<URL, Void, List<Quake>> {
-        @Override
-        protected List<Quake> doInBackground(URL... urls) {
-            // Create URL object
+    private void updateUi(ArrayList<Quake> earthquakes) {
+        ListView earthquakeListView = (ListView) findViewById(R.id.list);
+        // Create new ArrayAdapter of earthquakes
+        ArrayAdapter<Quake> adapter = new QuakeAdapter(getApplicationContext(), earthquakes);
+        earthquakeListView.setAdapter(adapter);
+    }
 
-            return null;
+    private class EarthquakeAsyncTask extends AsyncTask<URL, Void, ArrayList<Quake>> {
+
+        @Override
+        protected ArrayList<Quake> doInBackground(URL... urls) {
+            // Create URL object
+            URL url = QueryUtils.createURL(USGS_QUERY_URL);
+            // Then perform HTTP request with url object
+            String JSONResponse = "";
+                    try {
+                        JSONResponse = QueryUtils.makeHttpRequest(url);
+                    } catch (IOException e) {
+                        Log.e(LOG_TAG, "Error creating HTTP request: " + e);
+                    }
+            // Then extract relevant information from the response
+
+            earthquakes = QueryUtils.extractFeaturesFromJson(JSONResponse);
+            return earthquakes;
         }
+
+        @Override
+        protected void onPostExecute(ArrayList<Quake> earthquakes) {
+            if (earthquakes == null) {
+                return;
+            }
+            updateUi(earthquakes);
+        }
+
+
     }
 }
