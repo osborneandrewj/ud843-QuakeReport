@@ -12,6 +12,7 @@ public class Quake {
     private String mPlace;
     private double mMag;
     private long mDate = 0;
+    private String mUrl;
     private static final String LOCATION_SPLITTER = " of ";
 
     /**
@@ -25,7 +26,21 @@ public class Quake {
         mPlace = aPlace;
         mMag = aMag;
         mDate = aTemporaryTimeHolder;
+    }
 
+    /**
+     * Create a new Quake object with a url
+     *
+     * @param aPlace
+     * @param aMag
+     * @param aTemporaryTimeHolder
+     * @param aUrl
+     */
+    public Quake(String aPlace, double aMag, long aTemporaryTimeHolder, String aUrl) {
+        mPlace = aPlace;
+        mMag = aMag;
+        mDate = aTemporaryTimeHolder;
+        mUrl = aUrl;
     }
 
     public String getPlace() {
@@ -40,8 +55,8 @@ public class Quake {
         return split[0];
     }
 
-    public String getMag() {
-        return Double.toString(mMag);
+    public double getMag() {
+        return mMag;
     }
 
     public String getDate() {
@@ -59,6 +74,10 @@ public class Quake {
         SimpleDateFormat timeFormat = new SimpleDateFormat("H:mm a");
 
         return timeFormat.format(mDate);
+    }
+
+    public String getUrl() {
+        return mUrl;
     }
 
 

@@ -9,17 +9,21 @@
 
     <TextView
         android:id="@+id/mag_text"
-        android:layout_width="50dp"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_gravity="center_vertical"
+        android:layout_marginRight="16dp"
+        android:background="@drawable/magnitude_circle"
         android:gravity="center"
-        android:paddingRight="8dp"
-        android:layout_height="@dimen/list_item_height"
+        android:textColor="#ffffff"
+        android:textSize="16sp"
         tools:text="Mag" />
 
     <LinearLayout
         android:id="@+id/place_and_date_container"
         android:layout_width="0dp"
-        android:layout_weight="1"
         android:layout_height="@dimen/list_item_height"
+        android:layout_weight="1"
         android:orientation="vertical">
 
         <LinearLayout
@@ -31,12 +35,14 @@
                 android:id="@+id/direction_text"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
+                android:textColor="@color/textColorEarthquakeDetails"
                 tools:text="Sample direction" />
 
             <TextView
                 android:id="@+id/date_text"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:textColor="@color/textColorEarthquakeDetails"
                 android:gravity="end"
                 tools:text="Sample date" />
 
@@ -51,12 +57,16 @@
                 android:id="@+id/place_text"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:textColor="#000000"
-                tools:text="sample place" />
+                android:textColor="@color/textColorEarthquakeLocation"
+                android:textSize="16sp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                tools:text="sample place that should be so long it wraps over" />
 
             <TextView
                 android:id="@+id/time_text"
                 android:layout_width="match_parent"
+                android:textColor="@color/textColorEarthquakeDetails"
                 android:layout_height="match_parent"
                 android:gravity="end"
                 tools:text="Sample time" />

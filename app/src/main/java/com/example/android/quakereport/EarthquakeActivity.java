@@ -15,14 +15,20 @@
  */
 package com.example.android.quakereport;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 import android.webkit.HttpAuthHandler;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 
 public class EarthquakeActivity extends AppCompatActivity {
 
@@ -33,19 +39,44 @@ public class EarthquakeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.quake_list);
 
+
+
         // Create a fake list of earthquakes
-        ArrayList<Quake> earthquakes = QueryUtils.extractEarthquakes();
+        //final ArrayList<Quake> earthquakes = QueryUtils.extractEarthquakeFeatures();
 
 
         // Find a reference to the {@link ListView} in the layout
-        ListView earthquakeListView = (ListView) findViewById(R.id.list);
+        // final ListView earthquakeListView = (ListView) findViewById(R.id.list);
 
         // Create a new {@link ArrayAdapter} of earthquakes
-        ArrayAdapter<Quake> adapter = new QuakeAdapter(
-                this, earthquakes);
+        // ArrayAdapter<Quake> adapter = new QuakeAdapter(
+        //        this, earthquakes);
 
         // Set the adapter on the {@link ListView}
         // so the list can be populated in the user interface
-        earthquakeListView.setAdapter(adapter);
+        // earthquakeListView.setAdapter(adapter);
+
+//        earthquakeListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//                // Get the quake object at the given position the user clicked on
+//                Quake quake = earthquakes.get(position);
+//
+//                String url = quake.getUrl();
+//
+//                Intent intent = new Intent(Intent.ACTION_VIEW);
+//                intent.setData(Uri.parse(url));
+//                startActivity(intent);
+//            }
+//        });
+    }
+
+    private class EarthquakeAsyncTask extends AsyncTask<URL, Void, List<Quake>> {
+        @Override
+        protected List<Quake> doInBackground(URL... urls) {
+            // Create URL object
+
+            return null;
+        }
     }
 }
