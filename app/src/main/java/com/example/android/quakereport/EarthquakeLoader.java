@@ -35,11 +35,13 @@ public class EarthquakeLoader extends AsyncTaskLoader<ArrayList<Quake>> {
 
     @Override
     protected void onStartLoading() {
+        Log.v(LOG_TAG, "onStart Loading here!");
         forceLoad();
     }
 
     @Override
     public ArrayList<Quake> loadInBackground() {
+        Log.v(LOG_TAG, "Now running loadInBackground");
         if (mUrl == null) {
             return null;
         }

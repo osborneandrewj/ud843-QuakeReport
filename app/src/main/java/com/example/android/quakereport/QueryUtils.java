@@ -31,7 +31,7 @@ public final class QueryUtils {
      */
     private static final String LOG_TAG = QueryUtils.class.getSimpleName();
 
-    public static final int MIN_MAGNITUDE_FOR_QUERY = 4;
+    public static final int MIN_MAGNITUDE_FOR_QUERY = 2;
     public static final int NUMBER_OF_DAYS_TO_QUERY = 5;
 
     /**
@@ -91,8 +91,8 @@ public final class QueryUtils {
         String usgsBaseQuery = "http://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson";
 
         // Date format for converting dates into the URL query format
+        // (i.e. "2016-12-01")
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        // Calendar object to be used for getting start and end dates
 
         // String builder to build the final URL string
         StringBuilder urlString = new StringBuilder();
@@ -108,11 +108,13 @@ public final class QueryUtils {
         Calendar calendarToday = Calendar.getInstance();
         todayDate = dateFormat.format(calendarToday.getTime());
 
+        // Complete URL query with start date, end date, and a minimum
+        // magnitude value
         urlString.append(usgsBaseQuery);
         urlString.append("&starttime=" + startDate);
         urlString.append("&endtime=" + todayDate);
         urlString.append("&minmagnitude=" + MIN_MAGNITUDE_FOR_QUERY);
-        Log.v(LOG_TAG, "Current URL string: " + urlString.toString());
+        Log.i(LOG_TAG, "Current URL string from createUrlString: " + urlString.toString());
 
         return urlString.toString();
     }

@@ -22,9 +22,12 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
+
 import java.util.ArrayList;
 
 
@@ -35,6 +38,8 @@ public class EarthquakeActivity extends AppCompatActivity implements android.sup
     private QuakeAdapter mQuakeAdapter;
     /** Log tag */
     public static final String LOG_TAG = EarthquakeActivity.class.getName();
+    /** TextView that is displayed when the list is empty */
+    private TextView mEmptyStateTextView;
 
 
     @Override
@@ -69,13 +74,18 @@ public class EarthquakeActivity extends AppCompatActivity implements android.sup
         });
 
         getSupportLoaderManager().initLoader(1, null, this);
+        Log.v(LOG_TAG, "getSupportLoaderManager().initLoader executing!");
+
+        mEmptyStateTextView = (TextView)findViewById(R.id.empty);
+        earthquakeListView.setEmptyView(mEmptyStateTextView);
     }
 
 
     @Override
     public android.support.v4.content.Loader<ArrayList<Quake>> onCreateLoader(int id, Bundle args) {
-
+        Log.v(LOG_TAG, "onCreateLoader here");
         return new EarthquakeLoader(this, "nothing");
+
     }
 
     @Override
@@ -83,6 +93,7 @@ public class EarthquakeActivity extends AppCompatActivity implements android.sup
 
         // Loader reset, so we can clear out our existing code
         mQuakeAdapter.clear();
+        Log.v(LOG_TAG, "onLoaderReset here");
     }
 
     @Override
@@ -90,8 +101,13 @@ public class EarthquakeActivity extends AppCompatActivity implements android.sup
         // Clear the adapter of previous earthquake data
         mQuakeAdapter.clear();
 
+        // Set empty state text to display "No earthquakes found."
+        mEmptyStateTextView.setText(R.string.empty_text);
+
         if (earthquakes != null && !earthquakes.isEmpty()) {
             mQuakeAdapter.addAll(earthquakes);
+            Log.v(LOG_TAG, "onLoadFinished here");
         }
+
     }
 }
