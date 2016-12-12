@@ -15,7 +15,9 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -28,6 +30,9 @@ public final class QueryUtils {
      * Used for log tags
      */
     private static final String LOG_TAG = QueryUtils.class.getSimpleName();
+
+    public static final int MIN_MAGNITUDE_FOR_QUERY = 4;
+    public static final int NUMBER_OF_DAYS_TO_QUERY = 5;
 
     /**
      * Create a private constructor because no one should ever create a QueryUtils object.
@@ -80,6 +85,38 @@ public final class QueryUtils {
         return earthquakes;
     }
 
+    public static String createUrlString() {
+        // Create a string to be converted into a URL
+
+        String usgsBaseQuery = "http://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson";
+
+        // Date format for converting dates into the URL query format
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        // Calendar object to be used for getting start and end dates
+
+        // String builder to build the final URL string
+        StringBuilder urlString = new StringBuilder();
+
+        // Get Start date
+        String startDate;
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DATE, -NUMBER_OF_DAYS_TO_QUERY);
+        startDate = dateFormat.format(calendar.getTime());
+
+        // Get today's date
+        String todayDate;
+        Calendar calendarToday = Calendar.getInstance();
+        todayDate = dateFormat.format(calendarToday.getTime());
+
+        urlString.append(usgsBaseQuery);
+        urlString.append("&starttime=" + startDate);
+        urlString.append("&endtime=" + todayDate);
+        urlString.append("&minmagnitude=" + MIN_MAGNITUDE_FOR_QUERY);
+        Log.v(LOG_TAG, "Current URL string: " + urlString.toString());
+
+        return urlString.toString();
+    }
+
     /**
      * Method to create a new Quake object with data parsed from the JSONResponse
      *
@@ -96,9 +133,9 @@ public final class QueryUtils {
 
         try {
             // Convert String into a JSONObject
-            JSONObject jsonObject = new JSONObject(JSONResponse);
+            JSONObject baseJsonObject = new JSONObject(JSONResponse);
             // Get an array of returned earthquake events
-            JSONArray featureArray = jsonObject.getJSONArray("features");
+            JSONArray featureArray = baseJsonObject.getJSONArray("features");
 
             for (int i=0; i < featureArray.length(); i++) {
                 // For each earthquake event, get the properties object and extract info
@@ -120,7 +157,8 @@ public final class QueryUtils {
             // catch the exception here, so the app doesn't crash. Print a log.
             Log.e(LOG_TAG, "Problem parsing the earthquake JSON results: ", e);
         }
-        return null;
+
+        return earthquakes; // Temporarily changed this from "null" to "earthquakes"
     }
 
     /**
@@ -201,10 +239,8 @@ public final class QueryUtils {
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, Charset.forName("UTF-8")));
             String line = reader.readLine();
             while (line != null) {
-                Log.v(LOG_TAG, "Output: " + output + line);
                 output.append(line);
                 line = reader.readLine();
-                Log.v(LOG_TAG, "Output: " + output + line);
             }
         }
         return output.toString();

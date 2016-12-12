@@ -15,66 +15,50 @@
  */
 package com.example.android.quakereport;
 
+import android.support.v4.app.LoaderManager;
+import android.app.LoaderManager.LoaderCallbacks;
+import android.content.Loader;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
-import android.webkit.HttpAuthHandler;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
-
-import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.List;
 
-public class EarthquakeActivity extends AppCompatActivity {
 
+
+public class EarthquakeActivity extends AppCompatActivity implements android.support.v4.app.LoaderManager.LoaderCallbacks<ArrayList<Quake>> {
+
+    /** Adapter for the list of earthquakes */
+    private QuakeAdapter mQuakeAdapter;
+    /** Log tag */
     public static final String LOG_TAG = EarthquakeActivity.class.getName();
 
-    public static final String USGS_QUERY_URL = "http://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=2016-12-01&endtime=2016-12-06&minmagnitude=5";
-
-    public ArrayList<Quake> earthquakes;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.quake_list);
 
-
-
-        // Create a fake list of earthquakes
-        //final ArrayList<Quake> earthquakes = QueryUtils.extractEarthquakeFeatures();
-
-
-        // Find a reference to the {@link ListView} in the layout
-        // final ListView earthquakeListView = (ListView) findViewById(R.id.list);
-
-        // Create a new {@link ArrayAdapter} of earthquakes
-        // ArrayAdapter<Quake> adapter = new QuakeAdapter(
-        //        this, earthquakes);
-
-        // Set the adapter on the {@link ListView}
-        // so the list can be populated in the user interface
-        // earthquakeListView.setAdapter(adapter);
-
-
-
-        EarthquakeAsyncTask task = new EarthquakeAsyncTask();
-        task.execute();
-
+        // Find a reference to the ListView in the layout
         ListView earthquakeListView = (ListView) findViewById(R.id.list);
+
+        // Create a new adapter that takes an empty list (for now) of earthquakes as input
+        mQuakeAdapter = new QuakeAdapter(getApplicationContext(), new ArrayList<Quake>());
+
+        // Set the adapter on the ListView
+        // so the list can be populated in the user interface
+        earthquakeListView.setAdapter(mQuakeAdapter);
+
         // Set onclick listener
         earthquakeListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
                 // Get the quake object at the given position the user clicked on
-                Quake quake = earthquakes.get(position);
+                Quake quake = mQuakeAdapter.getItem(position);
 
                 String url = quake.getUrl();
 
@@ -83,42 +67,31 @@ public class EarthquakeActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        getSupportLoaderManager().initLoader(1, null, this);
     }
 
-    private void updateUi(ArrayList<Quake> earthquakes) {
-        ListView earthquakeListView = (ListView) findViewById(R.id.list);
-        // Create new ArrayAdapter of earthquakes
-        ArrayAdapter<Quake> adapter = new QuakeAdapter(getApplicationContext(), earthquakes);
-        earthquakeListView.setAdapter(adapter);
+
+    @Override
+    public android.support.v4.content.Loader<ArrayList<Quake>> onCreateLoader(int id, Bundle args) {
+
+        return new EarthquakeLoader(this, "nothing");
     }
 
-    private class EarthquakeAsyncTask extends AsyncTask<URL, Void, ArrayList<Quake>> {
+    @Override
+    public void onLoaderReset(android.support.v4.content.Loader<ArrayList<Quake>> loader) {
 
-        @Override
-        protected ArrayList<Quake> doInBackground(URL... urls) {
-            // Create URL object
-            URL url = QueryUtils.createURL(USGS_QUERY_URL);
-            // Then perform HTTP request with url object
-            String JSONResponse = "";
-                    try {
-                        JSONResponse = QueryUtils.makeHttpRequest(url);
-                    } catch (IOException e) {
-                        Log.e(LOG_TAG, "Error creating HTTP request: " + e);
-                    }
-            // Then extract relevant information from the response
+        // Loader reset, so we can clear out our existing code
+        mQuakeAdapter.clear();
+    }
 
-            earthquakes = QueryUtils.extractFeaturesFromJson(JSONResponse);
-            return earthquakes;
+    @Override
+    public void onLoadFinished(android.support.v4.content.Loader<ArrayList<Quake>> loader, ArrayList<Quake> earthquakes) {
+        // Clear the adapter of previous earthquake data
+        mQuakeAdapter.clear();
+
+        if (earthquakes != null && !earthquakes.isEmpty()) {
+            mQuakeAdapter.addAll(earthquakes);
         }
-
-        @Override
-        protected void onPostExecute(ArrayList<Quake> earthquakes) {
-            if (earthquakes == null) {
-                return;
-            }
-            updateUi(earthquakes);
-        }
-
-
     }
 }
