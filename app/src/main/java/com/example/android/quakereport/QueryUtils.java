@@ -31,7 +31,7 @@ public final class QueryUtils {
      */
     private static final String LOG_TAG = QueryUtils.class.getSimpleName();
 
-    public static final int MIN_MAGNITUDE_FOR_QUERY = 2;
+    public static final int MIN_MAGNITUDE_FOR_QUERY = 9;
     public static final int NUMBER_OF_DAYS_TO_QUERY = 5;
 
     /**
@@ -40,49 +40,6 @@ public final class QueryUtils {
      * directly from the class name QueryUtils (and an object instance of QueryUtils is not needed).
      */
     private QueryUtils() {
-    }
-
-    /**
-     * Return a list of Earthquake objects that has been built up from parsing
-     * a JSON response.
-     */
-    public static ArrayList<Quake> extractEarthquakeFeatures(String JSONResponse) {
-
-        // Create an empty ArrayList to which we can start adding Quakes
-        ArrayList<Quake> earthquakes = new ArrayList<>();
-
-        try {
-
-            // Convert SAMPLE_JSON_OBJECT String into a JSONObject
-            JSONObject jsonObject = new JSONObject(JSONResponse);
-
-            // Extract "features" JSONArray
-            JSONArray featureArray = jsonObject.getJSONArray("features");
-
-            // Loop through each feature in the featureArray
-            for (int i = 0; i < featureArray.length(); i++) {
-                JSONObject currentQuake = featureArray.getJSONObject(i);
-
-                // For each feature, get the properties object
-                JSONObject currentFeatures = currentQuake.getJSONObject("properties");
-
-                // Extract values of interest
-                double mag = currentFeatures.getDouble("mag");
-                String place = currentFeatures.getString("place");
-                long time = currentFeatures.getLong("time");
-                String url = currentFeatures.getString("url");
-
-                // Add values to earthquakes ArrayList
-                Quake quakeToBeAdded = new Quake(place, mag, time, url);
-                earthquakes.add(quakeToBeAdded);
-            }
-        } catch (JSONException e) {
-            // IF an error is thrown when executing any of the above statements in the "try" block,
-            // catch the exception here, so the app doesn't crash. Print a log.
-            Log.e("QueryUtils", "Problem parsing the earthquake JSON results", e);
-        }
-
-        return earthquakes;
     }
 
     public static String createUrlString() {
@@ -126,6 +83,16 @@ public final class QueryUtils {
      * @return (if successful), a new Quake object
      */
     public static ArrayList<Quake> extractFeaturesFromJson(String JSONResponse) {
+
+        // TEST make the thread sleep for 2 seconds
+        try {
+            Log.i(LOG_TAG, "Sleeping........");
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+
         if (TextUtils.isEmpty(JSONResponse)) {
             return null;
         }

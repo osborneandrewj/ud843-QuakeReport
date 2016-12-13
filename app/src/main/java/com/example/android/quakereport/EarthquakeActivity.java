@@ -26,13 +26,15 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 
 
 
-public class EarthquakeActivity extends AppCompatActivity implements android.support.v4.app.LoaderManager.LoaderCallbacks<ArrayList<Quake>> {
+public class EarthquakeActivity extends AppCompatActivity
+        implements android.support.v4.app.LoaderManager.LoaderCallbacks<ArrayList<Quake>> {
 
     /** Adapter for the list of earthquakes */
     private QuakeAdapter mQuakeAdapter;
@@ -40,6 +42,8 @@ public class EarthquakeActivity extends AppCompatActivity implements android.sup
     public static final String LOG_TAG = EarthquakeActivity.class.getName();
     /** TextView that is displayed when the list is empty */
     private TextView mEmptyStateTextView;
+    /** ProgressBar circle */
+    private ProgressBar progressBar;
 
 
     @Override
@@ -97,17 +101,37 @@ public class EarthquakeActivity extends AppCompatActivity implements android.sup
     }
 
     @Override
-    public void onLoadFinished(android.support.v4.content.Loader<ArrayList<Quake>> loader, ArrayList<Quake> earthquakes) {
+    public void onLoadFinished(android.support.v4.content.Loader<ArrayList<Quake>> loader,
+                               ArrayList<Quake> earthquakes) {
+
+        // Hide the "No earthquakes found" text
+        mEmptyStateTextView.setVisibility(View.INVISIBLE);
+
+        // Hide the progress bar spinner
+        progressBar = (ProgressBar)findViewById(R.id.progress_spinner_view);
+        if (progressBar != null) {
+            Log.i(LOG_TAG, "Now hiding the progress spinner");
+            progressBar.setVisibility(View.GONE);
+        }
+
         // Clear the adapter of previous earthquake data
         mQuakeAdapter.clear();
-
-        // Set empty state text to display "No earthquakes found."
-        mEmptyStateTextView.setText(R.string.empty_text);
 
         if (earthquakes != null && !earthquakes.isEmpty()) {
             mQuakeAdapter.addAll(earthquakes);
             Log.v(LOG_TAG, "onLoadFinished here");
         }
 
+        if (earthquakes != null && earthquakes.isEmpty()) {
+            mEmptyStateTextView.setVisibility(View.INVISIBLE);
+            progressBar = (ProgressBar)findViewById(R.id.progress_spinner_view);
+            if (progressBar != null) {
+                progressBar.setVisibility(View.GONE);
+            }
+            // Set empty state text to display "No earthquakes found."
+            Log.i(LOG_TAG, "NOW IN MY IF STATEMENT " + earthquakes);
+            mEmptyStateTextView.setVisibility(View.VISIBLE);
+            mEmptyStateTextView.setText(R.string.empty_text);
+        }
     }
 }
